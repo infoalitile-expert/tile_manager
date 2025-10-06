@@ -1,164 +1,197 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Ali Tile Manager</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js"></script>
-<style>
-  * {margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
-  body {background:#f4f4f4;color:#222;}
-  header {background:#1a73e8;color:#fff;padding:15px;text-align:center;font-weight:600;font-size:1.3em;}
-  .container {max-width:600px;margin:20px auto;background:#fff;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.1);padding:20px;}
-  input,button,select {width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:8px;font-size:15px;}
-  button {background:#1a73e8;color:white;border:none;cursor:pointer;transition:0.3s;}
-  button:hover {background:#0f5ad3;}
-  .hidden {display:none;}
-  .dashboard {margin-top:15px;}
-  .payment-list {background:#eef5ff;border-radius:8px;padding:10px;margin-top:10px;}
-  .payment-item {padding:5px 0;border-bottom:1px solid #ddd;}
-  .footer {text-align:center;margin-top:30px;font-size:14px;color:#555;}
-  .footer a {color:#1a73e8;text-decoration:none;}
-  @media(max-width:480px){header{font-size:1.1em;}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ali Tile Manager</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;font-family:'Poppins',sans-serif;}
+    body{margin:0;background:#f5f6fa;color:#333;}
+    header{background:#00796b;color:#fff;padding:15px;text-align:center;font-size:1.4em;font-weight:600;}
+    .container{max-width:420px;margin:30px auto;background:#fff;padding:25px;border-radius:10px;box-shadow:0 0 10px rgba(0,0,0,0.1);}
+    input,select,button{width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:8px;}
+    button{background:#00796b;color:#fff;font-weight:600;cursor:pointer;}
+    button:hover{background:#00695c;}
+    .dashboard{display:none;}
+    .card{background:#e8f5e9;padding:15px;margin:10px 0;border-radius:8px;}
+    .payments{background:#f1f8e9;padding:10px;margin-top:8px;border-radius:8px;}
+    .expand{color:#00796b;cursor:pointer;font-size:0.9em;}
+    footer{text-align:center;margin:30px 0;color:#555;font-size:0.9em;}
+  </style>
 </head>
 <body>
-<header>Ali Tile Manager</header>
+  <header>Ali Tile Manager</header>
 
-<div class="container" id="loginDiv">
-  <h2 style="text-align:center;">Login</h2>
-  <input type="email" id="email" placeholder="Enter Email" />
-  <input type="password" id="password" placeholder="Enter Password" />
-  <button id="loginBtn">Login</button>
-  <p style="text-align:center;margin-top:10px;">Use your unique ID provided by admin</p>
-</div>
-
-<div class="container hidden" id="dashboardDiv">
-  <h2 id="userTypeHeading">Dashboard</h2>
-  <div id="userDetails"></div>
-  
-  <div class="dashboard">
-    <h3>Payments</h3>
-    <button id="addPaymentBtn">Add Payment</button>
-    <div id="paymentSection"></div>
+  <div class="container" id="loginContainer">
+    <h3>Login</h3>
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <select id="role">
+      <option value="worker">Worker</option>
+      <option value="project">Project Owner</option>
+      <option value="admin">Admin</option>
+    </select>
+    <button onclick="login()">Login</button>
+    <p id="loginMsg" style="color:red;font-size:0.9em;"></p>
   </div>
-  
-  <button id="logoutBtn" style="background:#e53935;">Logout</button>
-</div>
 
-<div class="footer">
-  <p>📍 Khatakheri, Saharanpur (UP) 247001 | 📞 <a href="https://wa.me/919627136607" target="_blank">WhatsApp: 9627136607</a></p>
-  <p>🇮🇳 Designed for Indian Tiling Professionals</p>
-</div>
-<!-- Firebase App (core SDK) -->
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <div class="dashboard" id="dashboard">
+    <h3 id="welcome"></h3>
+    <div id="adminPanel" style="display:none;">
+      <h4>Admin Panel</h4>
+      <input id="workerName" placeholder="Worker Name"/>
+      <input id="workerEmail" placeholder="Worker Email"/>
+      <input id="workerId" placeholder="Unique Worker ID"/>
+      <button onclick="addWorker()">Add Worker</button>
+      <hr/>
+      <input id="projectName" placeholder="Project Name"/>
+      <input id="projectEmail" placeholder="Project Email"/>
+      <input id="projectId" placeholder="Unique Project ID"/>
+      <button onclick="addProject()">Add Project</button>
+    </div>
 
-<!-- Firebase Authentication -->
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+    <div id="workerPanel" style="display:none;">
+      <h4>Worker Dashboard</h4>
+      <div id="workerPayments"></div>
+    </div>
 
-<!-- Firebase Firestore -->
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+    <div id="projectPanel" style="display:none;">
+      <h4>Project Dashboard</h4>
+      <div id="projectPayments"></div>
+      <input id="paymentAmount" placeholder="Payment Amount (₹)"/>
+      <button onclick="addPayment()">Add Payment</button>
+    </div>
 
-<script>
- // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyC_WmdR-NTEh1LXvVMU7H-ehH_yecWzbJw",
-  authDomain: "ali-tile-manager.firebaseapp.com",
-  projectId: "ali-tile-manager",
-  storageBucket: "ali-tile-manager.firebasestorage.app",
-  messagingSenderId: "108065859153",
-  appId: "1:108065859153:web:922b8f628e4777ace03a70",
-  measurementId: "G-TMX27XC1F4"
-};
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+    <button onclick="logout()">Logout</button>
+  </div>
 
-  const loginDiv = document.getElementById('loginDiv');
-  const dashboardDiv = document.getElementById('dashboardDiv');
-  const userDetails = document.getElementById('userDetails');
-  const paymentSection = document.getElementById('paymentSection');
-  const userTypeHeading = document.getElementById('userTypeHeading');
+  <footer>
+    📍 Khatakheri, Saharanpur (UP) 247001<br/>
+    📞 WhatsApp: <a href="https://wa.me/919627136607" target="_blank">9627136607</a>
+  </footer>
 
-  document.getElementById('loginBtn').onclick = async () => {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    try {
-      const userCred = await auth.signInWithEmailAndPassword(email, password);
-      loadDashboard(userCred.user.uid);
-    } catch (err) {
-      alert("Login failed: " + err.message);
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    // Your Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyC_WmdR-NTEh1LXvVMU7H-ehH_yecWzbJw",
+      authDomain: "ali-tile-manager.firebaseapp.com",
+      projectId: "ali-tile-manager",
+      storageBucket: "ali-tile-manager.firebasestorage.app",
+      messagingSenderId: "108065859153",
+      appId: "1:108065859153:web:922b8f628e4777ace03a70",
+      measurementId: "G-TMX27XC1F4"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    async function login() {
+      const email = emailEl.value.trim();
+      const pass = passwordEl.value.trim();
+      const role = roleEl.value;
+      try {
+        const res = await auth.signInWithEmailAndPassword(email, pass);
+        const uid = res.user.uid;
+        showDashboard(role, uid);
+      } catch (e) {
+        loginMsg.innerText = e.message;
+      }
     }
-  };
 
-  document.getElementById('logoutBtn').onclick = () => {
-    auth.signOut();
-    dashboardDiv.classList.add('hidden');
-    loginDiv.classList.remove('hidden');
-  };
+    async function showDashboard(role, uid) {
+      loginContainer.style.display = "none";
+      dashboard.style.display = "block";
+      welcome.innerText = `Welcome, ${role.toUpperCase()}`;
 
-  async function loadDashboard(uid) {
-    const docRef = db.collection('users').doc(uid);
-    const docSnap = await docRef.get();
-    if (!docSnap.exists) {
-      alert("User data not found!");
-      return;
+      if (role === "admin") {
+        adminPanel.style.display = "block";
+      } else if (role === "worker") {
+        workerPanel.style.display = "block";
+        loadPayments(uid, "workers");
+      } else if (role === "project") {
+        projectPanel.style.display = "block";
+        loadPayments(uid, "projects");
+      }
     }
-    const data = docSnap.data();
-    loginDiv.classList.add('hidden');
-    dashboardDiv.classList.remove('hidden');
-    userTypeHeading.innerText = data.type === 'worker' ? "👷 Worker Dashboard" : "🏗️ Project Dashboard";
-    userDetails.innerHTML = `
-      <p><strong>Name:</strong> ${data.name}</p>
-      <p><strong>Unique ID:</strong> ${data.uniqueId}</p>
-      <p><strong>Email:</strong> ${data.email}</p>
-    `;
-    loadPayments(uid);
-  }
 
-  async function loadPayments(uid) {
-    paymentSection.innerHTML = "<p>Loading payments...</p>";
-    const snap = await db.collection('users').doc(uid).collection('payments').orderBy('date', 'desc').get();
-    if (snap.empty) {
-      paymentSection.innerHTML = "<p>No payments recorded yet.</p>";
-      return;
+    async function addWorker() {
+      const w = {
+        name: workerName.value,
+        email: workerEmail.value,
+        uniqueId: workerId.value
+      };
+      await db.collection("workers").doc(w.uniqueId).set(w);
+      alert("Worker added!");
     }
-    let total = 0;
-    let html = '<div class="payment-list">';
-    snap.forEach(doc => {
-      const p = doc.data();
-      total += parseFloat(p.amount);
-      html += `
-        <div class="payment-item">
-          <b>₹${p.amount}</b> - ${p.date}<br/>
-          <small>${p.note || ''}</small>
-        </div>`;
-    });
-    html += `<div style="margin-top:10px;font-weight:600;">Total: ₹${total}</div></div>`;
-    paymentSection.innerHTML = html;
-  }
 
-  document.getElementById('addPaymentBtn').onclick = async () => {
-    const user = auth.currentUser;
-    if (!user) return;
-    const amount = prompt("Enter payment amount (₹):");
-    if (!amount) return;
-    const note = prompt("Enter note or project detail:");
-    await db.collection('users').doc(user.uid).collection('payments').add({
-      amount: parseFloat(amount),
-      note: note,
-      date: new Date().toLocaleDateString('en-IN')
-    });
-    alert("Payment added!");
-    loadPayments(user.uid);
-  };
+    async function addProject() {
+      const p = {
+        name: projectName.value,
+        email: projectEmail.value,
+        uniqueId: projectId.value,
+        payments: []
+      };
+      await db.collection("projects").doc(p.uniqueId).set(p);
+      alert("Project added!");
+    }
 
-  auth.onAuthStateChanged(user => {
-    if (user) loadDashboard(user.uid);
-  });
-</script>
+    async function addPayment() {
+      const amt = parseFloat(paymentAmount.value);
+      const user = auth.currentUser;
+      if (!user || !amt) return alert("Enter valid amount");
+      const pRef = db.collection("projects").doc(user.uid);
+      await pRef.collection("payments").add({
+        amount: amt,
+        date: new Date().toLocaleString()
+      });
+      alert("Payment added!");
+      loadPayments(user.uid, "projects");
+    }
+
+    async function loadPayments(uid, col) {
+      const panel = col === "workers" ? workerPayments : projectPayments;
+      panel.innerHTML = "<b>Payments:</b>";
+      const snap = await db.collection(col).doc(uid).collection("payments").get();
+      let total = 0;
+      snap.forEach(doc => {
+        const d = doc.data();
+        total += d.amount;
+        const div = document.createElement("div");
+        div.className = "payments";
+        div.innerHTML = `₹${d.amount} — ${d.date}`;
+        panel.appendChild(div);
+      });
+      const totalDiv = document.createElement("div");
+      totalDiv.className = "card";
+      totalDiv.innerHTML = `<b>Total Received: ₹${total}</b>`;
+      panel.appendChild(totalDiv);
+    }
+
+    function logout() {
+      auth.signOut();
+      dashboard.style.display = "none";
+      loginContainer.style.display = "block";
+    }
+
+    const emailEl = document.getElementById("email");
+    const passwordEl = document.getElementById("password");
+    const roleEl = document.getElementById("role");
+    const loginContainer = document.getElementById("loginContainer");
+    const dashboard = document.getElementById("dashboard");
+    const loginMsg = document.getElementById("loginMsg");
+    const adminPanel = document.getElementById("adminPanel");
+    const workerPanel = document.getElementById("workerPanel");
+    const projectPanel = document.getElementById("projectPanel");
+    const welcome = document.getElementById("welcome");
+    const workerPayments = document.getElementById("workerPayments");
+    const projectPayments = document.getElementById("projectPayments");
+  </script>
 </body>
 </html>
