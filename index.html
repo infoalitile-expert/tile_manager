@@ -71,23 +71,41 @@
     📞 WhatsApp: <a href="https://wa.me/919627136607" target="_blank">9627136607</a>
   </footer>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+  <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
-  <script>
-    // Your Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyC_WmdR-NTEh1LXvVMU7H-ehH_yecWzbJw",
-      authDomain: "ali-tile-manager.firebaseapp.com",
-      projectId: "ali-tile-manager",
-      storageBucket: "ali-tile-manager.firebasestorage.app",
-      messagingSenderId: "108065859153",
-      appId: "1:108065859153:web:922b8f628e4777ace03a70",
-      measurementId: "G-TMX27XC1F4"
-    };
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyC_WmdR-NTEh1LXvVMU7H-ehH_yecWzbJw",
+    authDomain: "ali-tile-manager.firebaseapp.com",
+    projectId: "ali-tile-manager",
+    storageBucket: "ali-tile-manager.firebasestorage.app",
+    messagingSenderId: "108065859153",
+    appId: "1:108065859153:web:922b8f628e4777ace03a70",
+    measurementId: "G-TMX27XC1F4"
+  };
 
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyC_WmdR-NTEh1LXvVMU7H-ehH_yecWzbJw",
+  authDomain: "ali-tile-manager.firebaseapp.com",
+  projectId: "ali-tile-manager",
+  storageBucket: "ali-tile-manager.firebasestorage.app",
+  messagingSenderId: "108065859153",
+  appId: "1:108065859153:web:922b8f628e4777ace03a70",
+  measurementId: "G-TMX27XC1F4"
+};
+    
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  </script>
+  
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -195,3 +213,4 @@
   </script>
 </body>
 </html>
+
